@@ -1,0 +1,52 @@
+# @credits https://github.com/c0re100/qBittorrent-Enhanced-Edition
+name: check for new releases
+
+on:
+  - workflow_dispatch
+
+jobs:
+  check_release:
+    runs-on: ubuntu-latest
+    name: "Check for latest releases or tags"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: bootstrap values
+        run: |
+          qbittorrent_current_github_tag="$(git ls-remote -q -t --refs "https://github.com/qbittorrent/qBittorrent.git" | awk '{sub("refs/tags/release-", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+          qbittorrent_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*Qbittorrent.*|' | awk '{ print $4 }')"
+
+          qt5_current_github_tag="$(git ls-remote -q -t --refs https://github.com/qt/qtbase.git | awk '/v5(.*)-lts-lgpl/{sub("refs/tags/v", ""); print $2 }' | sed 's/-lts-lgpl//g' | awk '!/^$/' | sort -rV | head -n1)"
+          qt5_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*Qt5.*|' | awk '{ print $4 }')"
+
+          qt6_current_github_tag="$(git ls-remote -q -t --refs "https://github.com/qt/qtbase.git" | awk '/v6/{sub("refs/tags/v", ""); sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+          qt6_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*Qt6.*|' | awk '{ print $4 }')"
+
+          libtorrent_current_github_tag="$(git ls-remote -q -t --refs "https://github.com/arvidn/libtorrent.git" | awk '/\/v2/{sub("refs/tags/v", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+          libtorrent_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*Libtorrent.*|' | awk '{ print $4 }')"
+
+          boost_current_github_tag="$(git ls-remote -q -t --refs https://github.com/boostorg/boost.git | awk '{sub("refs/tags/boost-", "");sub("(.*)(rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+          boost_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*Boost.*|' | awk '{ print $4 }')"
+
+          openssl_current_github_tag="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl/{sub("refs/tags/openssl-", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+          openssl_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*OpenSSL.*|' | awk '{ print $4 }')"
+
+          current_github_tag_array=("${qbittorrent_current_github_tag}" "${qt5_current_github_tag}" "${qt6_current_github_tag}" "${libtorrent_current_github_tag}" "${boost_current_github_tag}" "${openssl_current_github_tag}")
+          current_build_version=("${qbittorrent_current_build_version}" "${qt5_current_build_version}" "${qt6_current_build_version}" "${libtorrent_current_build_version}" "${boost_current_build_version}" "${openssl_current_build_version}")
+
+          for iray in "${!current_github_tag_array[@]}"; do
+            if [[ "${current_github_tag_array[iray]//\./}" -gt "${current_build_version[iray]//\./}" ]]; then
+              echo "trigger_workflow=yes" >> $GITHUB_ENV
+                else
+              printf '%s\n' "1:${current_github_tag_array[iray]//\./} 2:${current_build_version[iray]//\./}"
+            fi
+          done
+
+      - name: Invoke workflow in another repo with inputs
+        if: env.trigger_workflow == 'yes'
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: matrix multi build and release - qbt-workflow-files
+          repo: userdocs/qbt_static_test
+          token: ${{ secrets.MYTOKEN }}
