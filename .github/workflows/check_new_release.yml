@@ -32,8 +32,8 @@ jobs:
           openssl_current_github_tag="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl/{sub("refs/tags/openssl-", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
           openssl_current_build_version="$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | jq -r '.body' | grep '|.*OpenSSL.*|' | awk '{ print $4 }')"
 
-          current_github_tag_array=("${qbittorrent_current_github_tag}" "${qt5_current_github_tag}" "${qt6_current_github_tag}" "${libtorrent_current_github_tag}" "${boost_current_github_tag}" "${openssl_current_github_tag}")
-          current_build_version=("${qbittorrent_current_build_version}" "${qt5_current_build_version}" "${qt6_current_build_version}" "${libtorrent_current_build_version}" "${boost_current_build_version}" "${openssl_current_build_version}")
+          current_github_tag_array=( "${qbittorrent_current_github_tag}" "${qt5_current_github_tag}" "${qt6_current_github_tag}" "${libtorrent_current_github_tag}" "${boost_current_github_tag}" "${openssl_current_github_tag}" )
+          current_build_version=( "${qbittorrent_current_build_version}" "${qt5_current_build_version}" "${qt6_current_build_version}" "${libtorrent_current_build_version}" "${boost_current_build_version}" "${openssl_current_build_version}" )
 
           for iray in "${!current_github_tag_array[@]}"; do
             if [[ "${current_github_tag_array[iray]//\./}" -gt "${current_build_version[iray]//\./}" ]]; then
