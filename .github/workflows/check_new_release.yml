@@ -48,5 +48,5 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: matrix multi build and release - qbt-workflow-files
-          repo: userdocs/qbt_static_test
+          repo: userdocs/qbittorrent-nox-static
           token: ${{ secrets.MYTOKEN }}
