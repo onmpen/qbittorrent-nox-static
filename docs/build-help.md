@@ -12,8 +12,8 @@ The script has some `env` settings that can trigger certain behaviours.
 
 | Build variable       | Default if unset | Options             | example usage                             |
 | -------------------- | ---------------- | ------------------- | ----------------------------------------- |
-| `libtorrent_version` | `1.2`            | `1.2` `2.0`         | `export libtorrent_version=2.0`           |
-| `qbt_qt_version`     | `5.15`           | `5.12` `5.15` `6.6` | `export qbt_qt_version=6.2`               |
+| `libtorrent_version` | `2.0`            | `1.2` `2.0`         | `export libtorrent_version=2.0`           |
+| `qbt_qt_version`     | `6.3`            | `5.12` `5.15` `6.3` | `export qbt_qt_version=6.3`               |
 | `qbt_build_tool`     | `qmake`          | `cmake`             | `export qbt_build_tool=cmake`             |
 | `qbt_cross_name`     | `x86_64`         | `aarch64`  `armv7`  | `export qbt_cross_name=aarch64`           |
 | `qbt_patches_url`    | empty = `unset`  | `username/repo`     | `export qbt_patches_url=userdocs/patches` |
