@@ -53,8 +53,23 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         TZ: Europe/London
         qbt_qt_version: ${{ matrix.qbt_qt_version }}
+        qbt_workflow_files: yes
     steps:
       - uses: actions/checkout@v3
+
+      - name: Update container
+        run: |
+          apt-get update
+          apt-get upgrade -y
+
+      - name: bionic - apt-get install gcc-8-base g++-8
+        if: matrix.build_tool_flag == '-c' && matrix.container_codename == 'bionic'
+        run: |
+          apt-get install -y gcc-8 g++-8
+          echo "CC=gcc-8" >> $GITHUB_ENV
+          echo "AR=gcc-ar-8" >> $GITHUB_ENV
+          echo "CXX=g++-8" >> $GITHUB_ENV
+
       - run: bash qbittorrent-nox-static.sh -bs-a ${{ matrix.build_tool_flag }}
       - run: bash qbittorrent-nox-static.sh bison
       - run: bash qbittorrent-nox-static.sh gawk
