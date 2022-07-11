@@ -31,9 +31,9 @@ jobs:
             container_codename: bullseye
         include:
           - build_tool: "qmake"
-            qbt_qt_version: "5.15"
+            qbt_qt_version: "5"
           - build_tool: "cmake"
-            qbt_qt_version: "6.3"
+            qbt_qt_version: "6"
 
     name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.qbt_qt_version }}-${{ matrix.build_tool }}"
     env:
