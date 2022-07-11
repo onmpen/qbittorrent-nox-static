@@ -35,10 +35,10 @@ jobs:
           - build_tool: "cmake"
             qbt_qt_version: "6"
 
-    name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.qbt_qt_version }}-${{ matrix.build_tool }}"
+    name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-qt-${{ matrix.qbt_qt_version }}-${{ matrix.build_tool }}"
     env:
       build_dir: "qbt-build"
-      artifact_name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.qbt_qt_version }}-${{ matrix.build_tool }}-nox"
+      artifact_name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-qt-${{ matrix.qbt_qt_version }}-${{ matrix.build_tool }}-nox"
     container:
       image: ${{ matrix.container_id }}:${{ matrix.container_codename }}
       env:
