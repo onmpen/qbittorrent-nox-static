@@ -85,13 +85,13 @@ jobs:
 
       - name: Host - organise qt files
         run: |
-          if [[ "${{ matrix.qbt_qt_version }}" =~ ^5\. ]]; then
+          if [[ "${{ matrix.qbt_qt_version }}" =~ ^5 ]]; then
               mv -f artifact/qt5base.tar.xz artifact/qtbase.tar.xz
               mv -f artifact/qt5tools.tar.xz artifact/qttools.tar.xz
               rm -f artifact/qt6base.tar.xz artifact/qt6tools.tar.xz
           fi
 
-          if [[ "${{ matrix.qbt_qt_version }}" =~ ^6\. ]]; then
+          if [[ "${{ matrix.qbt_qt_version }}" =~ ^6 ]]; then
               mv -f artifact/qt6base.tar.xz artifact/qtbase.tar.xz
               mv -f artifact/qt6tools.tar.xz artifact/qttools.tar.xz
               rm -f artifact/qt5base.tar.xz artifact/qt5tools.tar.xz
