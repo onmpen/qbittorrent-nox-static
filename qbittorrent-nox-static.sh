@@ -96,10 +96,10 @@ set_default_values() {
 	qbt_libtorrent_version="${qbt_libtorrent_version:-2.0}" # Set this here so it is easy to see and change
 
 	if [[ "${qbt_build_tool}" == 'cmake' ]]; then
-		qbt_qt_version=${qbt_qt_version:-6.3}                                      # Set this here so it is easy to see and change. PATCH versions are detected automatically - for example, 5.15.4 will be used over 5.15.0
-		[[ "${qbt_qt_version}" =~ ^6\. ]] && qbt_use_qt6="ON" || qbt_use_qt6="OFF" # this automatically toggles the use of QT6 with qbittorrent and cmake
+		qbt_qt_version=${qbt_qt_version:-6}                                      # Set this here so it is easy to see and change. PATCH versions are detected automatically - for example, 5.15.4 will be used over 5.15.0
+		[[ "${qbt_qt_version}" =~ ^6 ]] && qbt_use_qt6="ON" || qbt_use_qt6="OFF" # this automatically toggles the use of QT6 with qbittorrent and cmake
 	else
-		qbt_qt_version=${qbt_qt_version:-5.15}
+		qbt_qt_version=${qbt_qt_version:-5}
 	fi
 
 	qbt_python_version="3" # We are only using python3 but it's easier to just change this if we need to.
@@ -536,7 +536,10 @@ set_module_urls() {
 
 	# we use a list since we can change the version to 6.0,6.1,6.2 and so on instead of being stuck with on the latest, i.e. 6.3
 	qt_github_tag_list="$(git_git ls-remote -q -t --refs https://github.com/qt/qtbase.git | awk '/v/{sub("refs/tags/", "");sub("(.*)(-a|-b|-r)", ""); print $2 }' | awk '!/^$/' | sort -rV)"
-	qt_version="$(grep -Eom1 "v${qbt_qt_version}.([0-9]{1,2})" <<< "${qt_github_tag_list}")"
+	qt_version="$(grep -Em1 "v${qbt_qt_version}" <<< "${qt_github_tag_list}" | sed 's/-lts-lgpl//g')"
+
+	read -ra qt_version_short_array <<< "${qt_version//\./ }"
+	qt_version_short="${qt_version_short_array[0]/v/}.${qt_version_short_array[1]/v/}"
 
 	qt5_version="$(grep -Em1 "v5" <<< "${qt_github_tag_list}" | sed 's/-lts-lgpl//g')"
 	qt6_version="$(grep -Em1 "v6" <<< "${qt_github_tag_list}")"
@@ -544,12 +547,12 @@ set_module_urls() {
 	qtbase_github_tag="${qt_version}"
 	qttools_github_tag="${qt_version}"
 
-	if [[ "${qbt_qt_version}" =~ ^6\. ]]; then
-		qtbase_url="https://download.qt.io/official_releases/qt/${qbt_qt_version}/${qtbase_github_tag/v/}/submodules/qtbase-everywhere-src-${qtbase_github_tag/v/}.tar.xz"
-		qttools_url="https://download.qt.io/official_releases/qt/${qbt_qt_version}/${qttools_github_tag/v/}/submodules/qttools-everywhere-src-${qttools_github_tag/v/}.tar.xz"
+	if [[ "${qbt_qt_version}" =~ ^6 ]]; then
+		qtbase_url="https://download.qt.io/official_releases/qt/${qt_version_short}/${qtbase_github_tag/v/}/submodules/qtbase-everywhere-src-${qtbase_github_tag/v/}.tar.xz"
+		qttools_url="https://download.qt.io/official_releases/qt/${qt_version_short}/${qttools_github_tag/v/}/submodules/qttools-everywhere-src-${qttools_github_tag/v/}.tar.xz"
 	else
-		qtbase_url="https://download.qt.io/official_releases/qt/${qbt_qt_version}/${qtbase_github_tag/v/}/submodules/qtbase-everywhere-opensource-src-${qtbase_github_tag/v/}.tar.xz"
-		qttools_url="https://download.qt.io/official_releases/qt/${qbt_qt_version}/${qttools_github_tag/v/}/submodules/qttools-everywhere-opensource-src-${qttools_github_tag/v/}.tar.xz"
+		qtbase_url="https://download.qt.io/official_releases/qt/${qt_version_short}/${qtbase_github_tag/v/}/submodules/qtbase-everywhere-opensource-src-${qtbase_github_tag/v/}.tar.xz"
+		qttools_url="https://download.qt.io/official_releases/qt/${qt_version_short}/${qttools_github_tag/v/}/submodules/qttools-everywhere-opensource-src-${qttools_github_tag/v/}.tar.xz"
 	fi
 
 	###################################################################################################################################################
@@ -588,7 +591,7 @@ set_module_urls() {
 
 	qbt_workflow_files_double_conversion="https://github.com/userdocs/qbt-workflow-files/releases/latest/download/double_conversion.tar.xz"
 
-	if [[ "${qbt_qt_version}" =~ ^6\. ]]; then
+	if [[ "${qbt_qt_version}" =~ ^6 ]]; then
 		qbt_workflow_files_qtbase="https://github.com/userdocs/qbt-workflow-files/releases/latest/download/qt6base.tar.xz"
 		qbt_workflow_files_qttools="https://github.com/userdocs/qbt-workflow-files/releases/latest/download/qt6tools.tar.xz"
 	else
@@ -1376,7 +1379,7 @@ while (("${#}")); do
 			echo -e " ${tb}${tu}env help - supported exportable evironment variables${cend}"
 			echo
 			echo -e " ${td}${clm}export qbt_libtorrent_version=\"\"${cend} ${td}-${cend} ${td}${clr}options${cend} ${td}1.2 2.0${cend}"
-			echo -e " ${td}${clm}export qbt_qt_version=\"\"${cend} ${td}---------${cend} ${td}${clr}options${cend} ${td}5.15 6.3, 6.3 and so on${cend}"
+			echo -e " ${td}${clm}export qbt_qt_version=\"\"${cend} ${td}---------${cend} ${td}${clr}options${cend} ${td}5,5.15,6,6.2,6.3 and so on${cend}"
 			echo -e " ${td}${clm}export qbt_build_tool=\"\"${cend} ${td}---------${cend} ${td}${clr}options${cend} ${td}qmake cmake${cend}"
 			echo -e " ${td}${clm}export qbt_cross_name=\"\"${cend} ${td}---------${cend} ${td}${clr}options${cend} ${td}aarch64 armv7 armhf${cend}"
 			echo -e " ${td}${clm}export qbt_patches_url=\"\"${cend} ${td}--------${cend} ${td}${clr}options${cend} ${td}userdocs/qbittorrent-nox-static or usee your full/shorthand github repo${cend}"
@@ -2050,7 +2053,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' || "${1}" = "${app_name}" ]]; then
 		download_folder "${app_name}" "${!app_github_url}"
 	fi
 
-	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6\. ]]; then
+	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6 ]]; then
 		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${double_conversion_version}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
 			-D CMAKE_VERBOSE_MAKEFILE="${qbt_cmake_debug:-OFF}" \
@@ -2093,7 +2096,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		libexecinfo="${lib_dir}/libexecinfo.a"
 	fi
 
-	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6\. ]]; then
+	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6 ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
 		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qt6_version}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
@@ -2117,7 +2120,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log"
 
 		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qt6_version}/dep-graph.dot"
-	elif [[ "${qbt_qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
+	elif [[ "${qbt_qt_version}" =~ ^5 ]]; then
 		if [[ "${qbt_skip_icu}" = 'no' ]]; then
 			icu=("-icu" "-no-iconv" "QMAKE_CXXFLAGS=-w -fpermissive")
 		else
@@ -2169,7 +2172,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		libexecinfo="${lib_dir}/libexecinfo.a"
 	fi
 
-	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6\. ]]; then
+	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^6 ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
 		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qt6_version}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
@@ -2189,7 +2192,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log"
 
 		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qt6_version}/dep-graph.dot"
-	elif [[ "${qbt_qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
+	elif [[ "${qbt_qt_version}" =~ ^5 ]]; then
 		"${qbt_install_dir}/bin/qmake" -set prefix "${qbt_install_dir}" |& tee "${qbt_install_dir}/logs/${app_name}.log"
 
 		"${qbt_install_dir}/bin/qmake" QMAKE_CXXFLAGS="-std=${cxx_standard} -static -w -fpermissive" QMAKE_LFLAGS="-static" |& tee -a "${qbt_install_dir}/logs/${app_name}.log"
