@@ -1,3 +1,40 @@
+### v2.1.0 - 17/01/2025
+
+`qbt-nox-static.bash` will be a created alongside the `qbittorrent-nox-static.sh`.
+
+`qbt-nox-static.bash` ≥ `v2.1.0`
+
+`qbt-nox-static.bash` will start `v2.1.0` and `qbittorrent-nox-static.sh` will be frozen at `v2.0.14`going forward.
+
+This is to avoid breaking anything. `v2.1.0` is not really changing the outcome but the behaviour of the script towards that outcome. So the least disruptive way is the opt in route.
+
+I also wanted to changed the extension from `sh` to `bash` as it is a bash script.
+
+Main changes:
+
+A reworked dependency and module installation logic, which has changed the default behaviour of the script. The script was designed to be run in a docker and needs `curl` and `git` to perform basic test functions. So it would automatically try to install all deps from a single array when run as root or with sudo to able to then do the basic interactions.
+
+This has been changed so that the script makes does not modify the host or create files if just called by it's name. It will do basic dependency checks and offer options to install what's needed.
+
+It can now only install the required test dependencies or perform basic functions if they are already installed meaning the basic features and help functions are usable without installing the full suits of dependencies.
+
+Updated the default build flags to be a bit more modern which breaks building on some older systems.
+
+Removed build script support for buster and focal due to conflicts with updated builds flags and will support current releases only going forward.
+
+general refactoring towards more consistent use of arrays data throughout the script.
+
+credits: Borrowed some build flags from here [qbittorrent/docker-qbittorrent-nox](https://github.com/qbittorrent/docker-qbittorrent-nox/blob/main/Dockerfile#L59-L61)
+
+### v2.0.15 - 17/01/2025
+
+`qbittorrent-nox-static.sh` only
+
+fixed: optimize was not working as intended for being spelt inconsistently and the checks for crossbuilding were not correct.
+changed: optimize now accepts a quoted string of flags. `-o "-things -to -pass"
+
+structure tweaks and layout.
+
 ### v2.0.14 - 31/12/2024
 
 fix: libtorrent `v1.2` and boost `1.86.0` check to not ignore `RC_1_2`
